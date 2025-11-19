@@ -1,0 +1,82 @@
+{
+  "recipient": "borrower@example.com",
+  "borrowerName": "Juan Dela Cruz",
+  "borrowerId": "2021-00123",
+  "requestId": "REQ-001234",
+  "requestDate": "2025-11-15T08:30:00.000Z",
+  "expectedReturnDate": "2025-11-22T17:00:00.000Z",
+  "purpose": "For Computer Programming Laboratory Exercise 3 - Database Integration Project. Students will use these tools to demonstrate CRUD operations and database connectivity.",
+  "authorizedStudents": [
+    {
+      "name": "Maria Santos",
+      "student_id": "2021-00456"
+    },
+    {
+      "name": "Pedro Reyes",
+      "student_id": "2021-00789"
+    }
+  ],
+  "requestedItems": [
+    {
+      "name": "Laptop Dell Latitude 5420",
+      "category": "Electronics",
+      "quantity": 3,
+      "unitOfMeasure": "units"
+    },
+    {
+      "name": "HDMI Cable",
+      "category": "Accessories",
+      "quantity": 2,
+      "unitOfMeasure": "pcs"
+    },
+    {
+      "name": "Wireless Mouse",
+      "category": "Peripherals",
+      "quantity": 3,
+      "unitOfMeasure": "pcs"
+    }
+  ],
+  "assignedItems": [
+    {
+      "name": "Laptop Dell Latitude 5420",
+      "propertyNo": "PROP-2024-001",
+      "condition": "EXCELLENT"
+    },
+    {
+      "name": "Laptop Dell Latitude 5420",
+      "propertyNo": "PROP-2024-002",
+      "condition": "GOOD"
+    },
+    {
+      "name": "Laptop Dell Latitude 5420",
+      "propertyNo": "PROP-2024-003",
+      "condition": "GOOD"
+    },
+    {
+      "name": "HDMI Cable",
+      "propertyNo": "PROP-2024-104",
+      "condition": "EXCELLENT"
+    },
+    {
+      "name": "HDMI Cable",
+      "propertyNo": "PROP-2024-105",
+      "condition": "GOOD"
+    },
+    {
+      "name": "Wireless Mouse",
+      "propertyNo": "PROP-2024-201",
+      "condition": "EXCELLENT"
+    },
+    {
+      "name": "Wireless Mouse",
+      "propertyNo": "PROP-2024-202",
+      "condition": "GOOD"
+    },
+    {
+      "name": "Wireless Mouse",
+      "propertyNo": "PROP-2024-203",
+      "condition": "FAIR"
+    }
+  ],
+  "adminNotes": "Please handle all equipment with care. Laptops have been freshly formatted and configured. Return all items in the same condition. Contact the IT department if you encounter any technical issues."
+}

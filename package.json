@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
+    "build": "vite build",
+    "preview": "vite-node generate-preview.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,9 +14,19 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@react-email/components": "^1.0.1",
+    "@react-email/render": "^2.0.0",
+    "@vitejs/plugin-react": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "nodemailer": "^7.0.10"
+    "lucide-react": "^0.554.0",
+    "nodemailer": "^7.0.10",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-email": "^5.0.4",
+    "tsx": "^4.20.6",
+    "vite": "^7.2.2",
+    "vite-node": "^5.2.0"
   }
 }

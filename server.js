@@ -5,6 +5,8 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
 const path = require("path");
+const { execSync } = require("child_process");
+const fs = require("fs");
 require("dotenv").config(); // This loads the .env file
 
 // 2. Initialize the Express app
@@ -102,6 +104,157 @@ Best Regards,
       res.status(200).send("Email sent successfully!");
     }
   });
+});
+
+// 7. Create the API endpoint for sending borrow receipt email using React components
+app.post("/send-borrow-receipt", async (req, res) => {
+  const { 
+    recipient, 
+    borrowerName, 
+    borrowerId,
+    requestId, 
+    requestDate, 
+    expectedReturnDate,
+    purpose,
+    authorizedStudents,
+    requestedItems,
+    assignedItems,
+    adminNotes
+  } = req.body;
+
+  if (!recipient || !borrowerName || !requestId) {
+    return res.status(400).send("Recipient, borrower name, and request ID are required.");
+  }
+
+  try {
+    // Create a temporary JSON file with the props
+    const tempPropsFile = path.join(__dirname, '.temp-email-props.json');
+    const tempOutputFile = path.join(__dirname, '.temp-email-output.html');
+    
+    const props = {
+      borrowerName,
+      borrowerId,
+      requestId,
+      requestDate,
+      expectedReturnDate,
+      purpose,
+      authorizedStudents,
+      requestedItems,
+      assignedItems,
+      adminNotes,
+    };
+    
+    fs.writeFileSync(tempPropsFile, JSON.stringify(props, null, 2));
+    
+    // Create a render script
+    const renderScript = `
+import { render } from "@react-email/render";
+import React from "react";
+import BorrowReceiptEmail from "./emails/BorrowReceiptEmail.jsx";
+import fs from "fs";
+
+const props = JSON.parse(fs.readFileSync("${tempPropsFile}", "utf-8"));
+const emailHtml = await render(React.createElement(BorrowReceiptEmail, props));
+fs.writeFileSync("${tempOutputFile}", emailHtml);
+console.log("Email rendered successfully");
+    `;
+    
+    const tempScriptFile = path.join(__dirname, '.temp-render-script.js');
+    fs.writeFileSync(tempScriptFile, renderScript);
+    
+    // Execute the script using vite-node
+    try {
+      const output = execSync(`npx vite-node ${tempScriptFile}`, {
+        cwd: __dirname,
+        stdio: 'pipe',
+        encoding: 'utf-8'
+      });
+      console.log("Render output:", output);
+    } catch (execError) {
+      console.error("Execution error:", execError.stdout?.toString(), execError.stderr?.toString());
+      throw new Error(`Failed to render email: ${execError.message}`);
+    }
+    
+    // Read the rendered HTML
+    const emailHtml = fs.readFileSync(tempOutputFile, 'utf-8');
+    
+    // Clean up temporary files
+    fs.unlinkSync(tempPropsFile);
+    fs.unlinkSync(tempScriptFile);
+    fs.unlinkSync(tempOutputFile);
+
+    // Plain text version
+    const formatDate = (dateString) => {
+      if (!dateString) return "N/A";
+      const date = new Date(dateString);
+      return date.toLocaleString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    };
+
+    const emailText = `
+BORROW REQUEST RECEIPT - ToolShare System
+
+REQUEST INFORMATION
+-------------------
+Request #: ${requestId}
+Borrower: ${borrowerName}${borrowerId ? ` (${borrowerId})` : ''}
+Request Date: ${formatDate(requestDate)}
+${expectedReturnDate ? `Expected Return Date: ${formatDate(expectedReturnDate)}` : ''}
+
+${purpose ? `Purpose: ${purpose}` : ''}
+
+${authorizedStudents && authorizedStudents.length > 0 ? `
+AUTHORIZED STUDENTS
+-------------------
+${authorizedStudents.map(s => `- ${s.name} (${s.student_id})`).join('\n')}
+` : ''}
+
+REQUESTED ITEMS (${requestedItems?.length || 0})
+-------------------
+${requestedItems && requestedItems.length > 0 
+  ? requestedItems.map(item => `- ${item.name} (${item.category || 'N/A'}): ${item.quantity} ${item.unitOfMeasure || 'units'}`).join('\n')
+  : 'No items requested'}
+
+${assignedItems && assignedItems.length > 0 ? `
+ASSIGNED ITEMS (${assignedItems.length})
+-------------------
+${assignedItems.map(item => `- ${item.name} - Property #: ${item.propertyNo || 'N/A'} (${item.condition || 'N/A'})`).join('\n')}
+` : ''}
+
+${adminNotes ? `Admin Notes: ${adminNotes}` : ''}
+
+---
+Thank you for using ToolShare!
+For assistance, please contact the administrator.
+`;
+
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: recipient,
+      subject: `Borrow Request Receipt - Request #${requestId}`,
+      html: emailHtml,
+      text: emailText,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        res.status(500).send("Error: Could not send email.");
+      } else {
+        console.log("Email sent: " + info.response);
+        res.status(200).send("Email sent successfully!");
+      }
+    });
+  } catch (error) {
+    console.error("Error rendering email:", error);
+    res.status(500).send("Error: Could not render email template.");
+  }
 });
 
 // 8. Start the server
