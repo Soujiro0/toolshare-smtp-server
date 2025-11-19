@@ -20,19 +20,74 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // 4. Set up the Gmail Transporter
 // This is the configuration for sending email
+const SMTP_HOST = process.env.SMTP_HOST || "smtp.gmail.com";
+const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587");
+const SMTP_SECURE = process.env.SMTP_SECURE === "true"; // true for port 465, false for 587
+
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // TLS
+  host: SMTP_HOST,
+  port: SMTP_PORT,
+  secure: SMTP_SECURE,
   auth: {
     user: process.env.GMAIL_USER, // Your email from .env
     pass: process.env.GMAIL_APP_PASSWORD, // Your App Password from .env
   },
+  connectionTimeout: 60000, // 60 seconds
+  greetingTimeout: 30000, // 30 seconds
+  socketTimeout: 60000, // 60 seconds
+  logger: process.env.NODE_ENV !== 'production',
+  debug: process.env.NODE_ENV !== 'production',
+});
+
+// Verify transporter configuration on startup
+transporter.verify(function (error, success) {
+  if (error) {
+    console.error("❌ SMTP Transporter verification failed:", error);
+    console.error("Please check your environment variables:");
+    console.error(`  SMTP_HOST: ${SMTP_HOST}`);
+    console.error(`  SMTP_PORT: ${SMTP_PORT}`);
+    console.error(`  SMTP_SECURE: ${SMTP_SECURE}`);
+    console.error(`  GMAIL_USER: ${process.env.GMAIL_USER ? '✓ Set' : '✗ Not set'}`);
+    console.error(`  GMAIL_APP_PASSWORD: ${process.env.GMAIL_APP_PASSWORD ? '✓ Set' : '✗ Not set'}`);
+  } else {
+    console.log("✅ SMTP Server is ready to send emails");
+    console.log(`   Host: ${SMTP_HOST}:${SMTP_PORT} (Secure: ${SMTP_SECURE})`);
+  }
 });
 
 // 5. Create a simple "test" route
 app.get("/", (req, res) => {
   res.send("Server is running and ready to send emails!");
+});
+
+// Test SMTP connection endpoint
+app.get("/test-smtp", async (req, res) => {
+  try {
+    await transporter.verify();
+    res.json({
+      success: true,
+      message: "SMTP connection successful!",
+      config: {
+        host: SMTP_HOST,
+        port: SMTP_PORT,
+        secure: SMTP_SECURE,
+        user: process.env.GMAIL_USER
+      }
+    });
+  } catch (error) {
+    console.error("SMTP connection failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "SMTP connection failed",
+      error: error.message,
+      config: {
+        host: SMTP_HOST,
+        port: SMTP_PORT,
+        secure: SMTP_SECURE,
+        user: process.env.GMAIL_USER
+      }
+    });
+  }
 });
 
 // 6. Create the API endpoint for sending email
