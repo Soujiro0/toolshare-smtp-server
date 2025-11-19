@@ -1,0 +1,7 @@
+# .gitignore
+
+# Ignore the credentials file
+.env
+
+# Ignore the installed packages
+/node_modules
