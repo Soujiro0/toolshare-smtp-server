@@ -8,6 +8,7 @@ import {
   Column,
   Text,
   Hr,
+  Img,
 } from '@react-email/components';
 import { Card, CardHeader, InfoRow } from './components/Card';
 
@@ -228,6 +229,26 @@ const BorrowReceiptEmail = ({
                     <table cellPadding="0" cellSpacing="0" style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <tbody>
                         <tr>
+                          {/* Item Image */}
+                          {item.image && (
+                            <td style={{ padding: '12px 12px 12px 0', verticalAlign: 'middle', width: '80px' }}>
+                              <Img
+                                src={item.image}
+                                alt={item.name}
+                                width="80"
+                                height="80"
+                                style={{
+                                  display: 'block',
+                                  width: '80px',
+                                  height: '80px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '1px solid #e5e7eb',
+                                }}
+                              />
+                            </td>
+                          )}
+                          {/* Item Details */}
                           <td style={{ padding: '12px 0', verticalAlign: 'middle' }}>
                             <h4
                               style={{
@@ -243,7 +264,8 @@ const BorrowReceiptEmail = ({
                               {item.category || 'N/A'}
                             </p>
                           </td>
-                          <td style={{ padding: '12px 0', textAlign: 'right', verticalAlign: 'middle' }}>
+                          {/* Quantity */}
+                          <td style={{ padding: '12px 0', textAlign: 'right', verticalAlign: 'middle', width: '80px' }}>
                             <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
                               {item.quantity}
                             </div>

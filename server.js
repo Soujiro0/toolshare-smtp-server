@@ -15,7 +15,8 @@ const PORT = process.env.PORT || 3001; // Use port from .env or default to 3001
 
 // 3. Set up middleware
 app.use(cors()); // Allows your React app to make requests to this server
-app.use(express.json()); // Allows the server to understand JSON in request bodies
+app.use(express.json({ limit: '50mb' })); // Allows the server to understand JSON in request bodies (increased limit for images)
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // 4. Set up the Gmail Transporter
 // This is the configuration for sending email
